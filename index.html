@@ -1,225 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reward Calculator</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-image: url("logo.gif");
-            background-size: cover;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
+    <title>Token Holdings Checker</title>
+</head>
+<body>
+    <h1>Token Holdings Checker</h1>
+    <label for="walletAddress">Enter Wallet Address:</label>
+    <input type="text" id="walletAddress" placeholder="0x...">
+    <button onclick="getTokenHoldings()">Check Holdings</button>
 
-        img {
-            width: 400px;
-            height: auto;
-            margin-bottom: 20px;
-        }
-
-        label {
-            color: white;
-            margin-bottom: 5px;
-        }
-
-        select {
-            width: 300px;
-            padding: 10px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            color: #333;
-        }
-
-        button {
-            margin-top: 10px;
-        }
-
-        #result-box {
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-
-        #result-column {
-            margin-top: 20px;
-        }
-
-        table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
-        }
-
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-        }
-    </style>
+    <div id="tokenHoldings"></div>
 
     <script>
-        async function fetchData() {
+        async function getTokenHoldings() {
+            const walletAddress = document.getElementById('walletAddress').value;
+            const apiUrl = `https://api.scan.pulsechain.com/api?module=account&action=tokenlist&address=${walletAddress}`;
+
             try {
-                const ethAddress = document.getElementById('ethAddressInput').value;
-                const contractAddress = document.getElementById('tokenSelect').value;
-                const selectedOption = document.getElementById('tokenSelect').selectedOptions[0].text.split(' - ')[1];
+                const response = await fetch(apiUrl);
+                const data = await response.json();
 
-                const payload = {
-                    args: [ethAddress],
-                    method_id: 'aceac856',
-                    contract_type: 'regular'
-                };
+                if (data.message === 'OK') {
+                    const tokenList = [
+                        '0x5b17a3d673c47c30a1e87e238dd31ad437158141',
+                        '0x75da7f3e6811e56b6f8e0a21ea79cffaef0fc2b8',
+                        '0x47273ee3360b936e1c9f2bc808da76e1df4b43c4',
+                        '0x282cecf3fef68cf38ee3e3880f69572c376b9cc1',
+                        '0x737fd5b88524d0b90b984ba4f64a6b81b1a1dbc0',
+                        '0xfa9ff85e0df45752df23d65d3b91e2b788c197bf',
+                        '0x61496615a3cc5f3bed6dad8cf3945cb6d7765f02',
+                        '0x99d6c086bf13f8dc7858629ca637fb900bb58925'
+                    ];
 
-                const response = await fetch(`https://api.scan.pulsechain.com/api/v2/smart-contracts/${contractAddress}/query-read-method?is_custom_abi=false`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload),
-                });
-
-                const responseData = await response.json();
-                console.log(responseData);
-
-                const formattedValue = formatNumberInEther(responseData.result.output[1].value, selectedOption);
-
-                document.getElementById('response').innerText = `Reward : ${formattedValue}`;
-                
-                // Add result to the new column
-                document.getElementById('result-column').innerText = `Result Column: ${formattedValue}`;
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        }
-
-        async function fetchAutoData() {
-            try {
-                const ethAddress = document.getElementById('ethAddressInput').value;
-                const contractAddress = document.getElementById('tokenSelect').value;
-                const selectedOption = document.getElementById('tokenSelect').selectedOptions[0].text.split(' - ')[1];
-
-                const tokenListResponse = await fetch(`https://api.bscscan.com/api?module=account&action=tokenlist&address=${ethAddress}`);
-                const tokenListData = await tokenListResponse.json();
-                console.log(tokenListData);
-
-                const holdingTokens = tokenListData.result.filter(token => token.contractAddress.toLowerCase() === contractAddress.toLowerCase());
-
-                if (holdingTokens.length > 0) {
-                    for (const token of holdingTokens) {
-                        const payload = {
-                            args: [ethAddress],
-                            method_id: 'aceac856',
-                            contract_type: 'regular'
-                        };
-
-                        const response = await fetch(`https://api.scan.pulsechain.com/api/v2/smart-contracts/${token.contractAddress}/query-read-method?is_custom_abi=false`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(payload),
+                    const tokenHoldings = data.result
+                        .filter(token => tokenList.includes(token.contractAddress.toLowerCase()))
+                        .map(token => {
+                            const balanceInEth = Number(token.balance) / 10 ** Number(token.decimals);
+                            return {
+                                contractAddress: token.contractAddress,
+                                balance: balanceInEth.toFixed(6), // Format balance according to decimal places
+                                decimals: token.decimals,
+                                name: token.name,
+                                symbol: token.symbol
+                            };
                         });
 
-                        const responseData = await response.json();
-                        console.log(responseData);
-
-                        const formattedValue = formatNumberInEther(responseData.result.output[1].value, selectedOption);
-
-                        document.getElementById('response').innerText += `Reward for ${token.name} : ${formattedValue}\n`;
-
-                        // Add result to the new column for each holding token
-                        document.getElementById('result-column').innerText += `Result Column for ${token.name}: ${formattedValue}\n`;
-                    }
+                    displayTokenHoldings(tokenHoldings);
                 } else {
-                    document.getElementById('response').innerText = 'No holdings of selected tokens found.';
+                    console.error('Error fetching token holdings:', data.message);
                 }
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error('Error fetching token holdings:', error);
             }
         }
 
-        function displayTokenTable() {
-            const walletContracts = [
-                { address: '0x5b17a3d673c47c30a1e87e238dd31ad437158141' },
-                { address: '0x75da7f3e6811e56b6f8e0a21ea79cffaef0fc2b8' },
-                { address: '0x47273ee3360b936e1c9f2bc808da76e1df4b43c4' },
-                { address: '0x282cecf3fef68cf38ee3e3880f69572c376b9cc1' },
-                { address: '0x737fd5b88524d0b90b984ba4f64a6b81b1a1dbc0' },
-                { address: '0xfa9ff85e0df45752df23d65d3b91e2b788c197bf' },
-                { address: '0x61496615a3cc5f3bed6dad8cf3945cb6d7765f02' },
-                { address: '0x99d6c086bf13f8dc7858629ca637fb900bb58925' }
-            ];
+        function displayTokenHoldings(tokenHoldings) {
+            const tokenHoldingsDiv = document.getElementById('tokenHoldings');
+            tokenHoldingsDiv.innerHTML = '';
 
-            const ethAddress = document.getElementById('ethAddressInput').value;
-            const contractAddress = document.getElementById('tokenSelect').value;
-            const selectedOption = document.getElementById('tokenSelect').selectedOptions[0].text.split(' - ')[1];
+            if (tokenHoldings.length > 0) {
+                const table = document.createElement('table');
+                const headerRow = table.insertRow(0);
 
-            const holdingContracts = walletContracts.filter(contract => contract.address.toLowerCase() === contractAddress.toLowerCase());
-
-            if (holdingContracts.length > 0) {
-                let tableHtml = '<table>';
-                tableHtml += '<tr><th>Contract</th><th>Address</th></tr>';
-                holdingContracts.forEach(contract => {
-                    tableHtml += `<tr><td>${contract.address}</td><td>${contract.address}</td></tr>`;
+                const headers = ['Contract Address', 'Balance', 'Decimals', 'Name', 'Symbol'];
+                headers.forEach(headerText => {
+                    const th = document.createElement('th');
+                    th.textContent = headerText;
+                    headerRow.appendChild(th);
                 });
-                tableHtml += '</table>';
 
-                document.getElementById('tokenTable').innerHTML = tableHtml;
+                tokenHoldings.forEach(token => {
+                    const row = table.insertRow(-1);
+                    Object.values(token).forEach(value => {
+                        const cell = row.insertCell(-1);
+                        cell.textContent = value;
+                    });
+                });
+
+                tokenHoldingsDiv.appendChild(table);
             } else {
-                document.getElementById('tokenTable').innerHTML = 'No holdings of selected tokens found.';
+                tokenHoldingsDiv.textContent = 'No token holdings found for the specified address.';
             }
-        }
-
-        function formatNumberInEther(value, rewardName) {
-            const etherValue = parseFloat(value) / 1e18;
-            return etherValue.toLocaleString('en-US', { maximumFractionDigits: 18 }) + ` ${rewardName}`;
         }
     </script>
-</head>
-
-<body>
-    <img src="logo.gif" alt="Logo">
-
-    <label for="ethAddressInput">Enter Pulse Address :</label>
-    <input type="text" id="ethAddressInput" placeholder="0x...">
-
-    <label for="tokenSelect">Select Token:</label>
-    <select id="tokenSelect">
-        <option value="0x5b17a3d673c47c30a1e87e238dd31ad437158141">RWDr - pays PLS</option>
-        <option value="0x75da7f3e6811e56b6f8e0a21ea79cffaef0fc2b8">INCr - pays INC</option>
-        <option value="0x47273ee3360b936e1c9f2bc808da76e1df4b43c4">DAIr - pays pDaI</option>
-        <option value="0x282cecf3fef68cf38ee3e3880f69572c376b9cc1">USDCr - pays pUSDC</option>
-        <option value="0x737fd5b88524d0b90b984ba4f64a6b81b1a1dbc0">USDPr - pays pUSDP</option>
-        <option value="0xfa9ff85e0df45752df23d65d3b91e2b788c197bf">MINEr - pays pWBTC</option>
-        <option value="0x61496615a3cc5f3bed6dad8cf3945cb6d7765f02">DIGr - pays pPAXG</option>
-        <option value="0x99d6c086bf13f8dc7858629ca637fb900bb58925">C3Cr - pays A1A/B2B LP tokens</option>
-    </select>
-
-    <button onclick="fetchData()">Fetch Data</button>
-    <button onclick="fetchAutoData()">Auto</button>
-    <button onclick="displayTokenTable()">Display Token Table</button>
-
-    <div id="result-box">
-        <div id="response"></div>
-    </div>
-
-    <div id="result-column"></div>
-
-    <div id="tokenTable"></div>
 </body>
-
 </html>
