@@ -87,9 +87,11 @@
                 const responseData = await response.json();
                 console.log(responseData);
 
-                const formattedValue = formatNumberInEther(responseData.result.output[1].value, selectedOption);
+                const formattedValue1 = formatNumberInEther(responseData.result.output[1].value, selectedOption);
+                const formattedValue2 = formatNumberInEther(responseData.result.output[2].value, selectedOption);
+                document.getElementById('response').innerText = `Reward : ${formattedValue1}`;
+                document.getElementById('response').innerText = `Claimed : ${formattedValue2}`;
 
-                document.getElementById('response').innerText = `Reward : ${formattedValue}`;
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -110,14 +112,14 @@
 
     <label for="tokenSelect">Select Token:</label>
     <select id="tokenSelect">
-        <option value="0x5b17a3d673c47c30a1e87e238dd31ad437158141">RWDr - PLS</option>
-        <option value="0x75da7f3e6811e56b6f8e0a21ea79cffaef0fc2b8">INCr - INC</option>
-        <option value="0x47273ee3360b936e1c9f2bc808da76e1df4b43c4">DAIr - pDaI</option>
-        <option value="0x282cecf3fef68cf38ee3e3880f69572c376b9cc1">USDCr - pUSDC</option>
-        <option value="0x737fd5b88524d0b90b984ba4f64a6b81b1a1dbc0">USDPr - pUSDP</option>
-        <option value="0xfa9ff85e0df45752df23d65d3b91e2b788c197bf">MINEr - pWBTC</option>
-        <option value="0x61496615a3cc5f3bed6dad8cf3945cb6d7765f02">DIGr - pPAXG</option>
-        <option value="0x99d6c086bf13f8dc7858629ca637fb900bb58925">C3Cr - A1A/B2B LP tokens</option>
+        <option value="0x5b17a3d673c47c30a1e87e238dd31ad437158141">RWDr - pays PLS</option>
+        <option value="0x75da7f3e6811e56b6f8e0a21ea79cffaef0fc2b8">INCr - pays INC</option>
+        <option value="0x47273ee3360b936e1c9f2bc808da76e1df4b43c4">DAIr - pays pDaI</option>
+        <option value="0x282cecf3fef68cf38ee3e3880f69572c376b9cc1">USDCr - pays pUSDC</option>
+        <option value="0x737fd5b88524d0b90b984ba4f64a6b81b1a1dbc0">USDPr - pays pUSDP</option>
+        <option value="0xfa9ff85e0df45752df23d65d3b91e2b788c197bf">MINEr - pays pWBTC</option>
+        <option value="0x61496615a3cc5f3bed6dad8cf3945cb6d7765f02">DIGr - pays pPAXG</option>
+        <option value="0x99d6c086bf13f8dc7858629ca637fb900bb58925">C3Cr - pays A1A/B2B LP tokens</option>
     </select>
 
     <button onclick="fetchData()">Fetch Data</button>
