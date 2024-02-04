@@ -13,9 +13,16 @@
 
     <div id="tokenTable"></div>
 
-    <div id="rewardData"></div>
-
     <script>
+        function formatRewardValue(rewardWei) {
+            // Convert Wei to Ether and format the result
+            const rewardEther = web3.utils.fromWei(rewardWei, 'ether');
+            return parseFloat(rewardEther).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 6
+            }) + ' ETH';
+        }
+
         function fetchTokenInfo() {
             const walletAddress = document.getElementById('walletAddress').value;
 
@@ -93,15 +100,6 @@
                 .catch(error => {
                     console.error('Error fetching data:', error);
                 });
-        }
-
-        function formatRewardValue(rewardWei) {
-            // Convert Wei to Ether and format the result
-            const rewardEther = web3.utils.fromWei(rewardWei, 'ether');
-            return parseFloat(rewardEther).toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 6
-            }) + ' ETH';
         }
 
         function getRewardData(contract, ethAddress, row) {
