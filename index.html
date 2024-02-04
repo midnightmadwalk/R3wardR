@@ -87,11 +87,11 @@
                 const responseData = await response.json();
                 console.log(responseData);
 
-                const formattedValue1 = formatNumberInEther(responseData.result.output[0].value, selectedOption);
-              //  const formattedValue2 = formatNumberInEther(responseData.result.output[1].value, selectedOption);
+                const formattedValue1 = formatNumberInEther(responseData.result.output[1].value, selectedOption);
+              //  const formattedValue2 = formatNumberInEther(responseData.result.output[0].value, selectedOption);
                 document.getElementById('response1').innerText = `Reward : ${formattedValue1}`;
                // document.getElementById('response2').innerText = `RewardClaimed : ${formattedValue2}`;
-
+              // <div id="response2"></div>
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -125,7 +125,7 @@
     <button onclick="fetchData()">Fetch Data</button>
     <div id="result-box">
         <div id="response1"></div>
-        // <div id="response2"></div>
+
     </div>
 </body>
 
