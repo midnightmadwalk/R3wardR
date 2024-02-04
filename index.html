@@ -3,131 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Token Holdings and Rewards Checker</title>
+    <title>Token Information</title>
 </head>
 <body>
-    <h1>Token Holdings and Rewards Checker</h1>
-    <label for="walletAddress">Enter Wallet Address:</label>
-    <input type="text" id="walletAddress" placeholder="0x...">
-    <button onclick="getTokenHoldings()">Check Holdings and Rewards</button>
 
-    <div id="tokenHoldings"></div>
-    <div id="rewards"></div>
+    <label for="walletAddress">Enter Ethereum Address: </label>
+    <input type="text" id="walletAddress" placeholder="Enter Ethereum address">
+    <button onclick="fetchTokenInfo()">Fetch Token Info</button>
+
+    <div id="tokenTable"></div>
 
     <script>
-        async function getTokenHoldings() {
+        function fetchTokenInfo() {
             const walletAddress = document.getElementById('walletAddress').value;
+
+            // Replace these contract addresses with the actual ones you want to check
+            const contractAddresses = [
+                '0x5b17a3d673c47c30a1e87e238dd31ad437158141',
+                '0x75da7f3e6811e56b6f8e0a21ea79cffaef0fc2b8',
+                '0x47273ee3360b936e1c9f2bc808da76e1df4b43c4',
+                '0x282cecf3fef68cf38ee3e3880f69572c376b9cc1',
+                '0x737fd5b88524d0b90b984ba4f64a6b81b1a1dbc0',
+                '0xfa9ff85e0df45752df23d65d3b91e2b788c197bf',
+                '0x61496615a3cc5f3bed6dad8cf3945cb6d7765f02'
+            ];
+
+            // API URL with the wallet address
             const apiUrl = `https://api.scan.pulsechain.com/api?module=account&action=tokenlist&address=${walletAddress}`;
 
-            try {
-                const response = await fetch(apiUrl);
-                const data = await response.json();
+            // Fetch data from the API
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    // Check if each contract address is present in the wallet
+                    const foundContracts = contractAddresses.filter(address => {
+                        return data.result.some(token => token.contractAddress.toLowerCase() === address.toLowerCase());
+                    });
 
-                if (data.message === 'OK') {
-                    const tokenList = [
-                        '0x5b17a3d673c47c30a1e87e238dd31ad437158141',
-                        '0x75da7f3e6811e56b6f8e0a21ea79cffaef0fc2b8',
-                        '0x47273ee3360b936e1c9f2bc808da76e1df4b43c4',
-                        '0x282cecf3fef68cf38ee3e3880f69572c376b9cc1',
-                        '0x737fd5b88524d0b90b984ba4f64a6b81b1a1dbc0',
-                        '0xfa9ff85e0df45752df23d65d3b91e2b788c197bf',
-                        '0x61496615a3cc5f3bed6dad8cf3945cb6d7765f02',
-                        '0x99d6c086bf13f8dc7858629ca637fb900bb58925'
-                    ];
-                    const tokenHoldings = data.result
-                        .filter(token => tokenList.includes(token.contractAddress.toLowerCase()))
-                        .map(token => {
-                            const balanceInEth = Number(token.balance) / 10 ** Number(token.decimals);
-                            return {
-                                contractAddress: token.contractAddress,
-                                balance: balanceInEth.toFixed(6),
-                                decimals: token.decimals,
-                                name: token.name,
-                                symbol: token.symbol
-                            };
+                    // Create a table and append it to the webpage
+                    const tokenTableDiv = document.getElementById('tokenTable');
+                    tokenTableDiv.innerHTML = '';
+
+                    if (foundContracts.length > 0) {
+                        const table = document.createElement('table');
+                        table.border = '1';
+
+                        // Add table header
+                        const headerRow = table.insertRow(0);
+                        headerRow.insertCell(0).textContent = 'Contract Address';
+                        headerRow.insertCell(1).textContent = 'Token Name';
+                        headerRow.insertCell(2).textContent = 'Token Symbol';
+
+                        // Add table rows for each found contract
+                        foundContracts.forEach(contract => {
+                            const token = data.result.find(t => t.contractAddress.toLowerCase() === contract.toLowerCase());
+                            const row = table.insertRow();
+                            row.insertCell(0).textContent = token.contractAddress;
+                            row.insertCell(1).textContent = token.name;
+                            row.insertCell(2).textContent = token.symbol;
                         });
 
-                    displayTokenHoldings(tokenHoldings);
-
-                    // Fetch rewards for each token
-                    for (const token of tokenHoldings) {
-                        await fetchRewards(token.contractAddress, walletAddress);
+                        tokenTableDiv.appendChild(table);
+                    } else {
+                        tokenTableDiv.innerHTML = 'No contracts found in the wallet.';
                     }
-                } else {
-                    console.error('Error fetching token holdings:', data.message);
-                }
-            } catch (error) {
-                console.error('Error fetching token holdings:', error);
-            }
-        }
-
-        async function fetchRewards(contractAddress, ethAddress) {
-            const rewardsApiUrl = `https://api.scan.pulsechain.com/api/v2/smart-contracts/${contractAddress}/query-read-method?is_custom_abi=false`;
-
-            const payload = {
-                args: [ethAddress],
-                method_id: 'aceac856',
-                contract_type: 'regular'
-            };
-
-            try {
-                const response = await fetch(rewardsApiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload),
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
                 });
-
-                const rewardsData = await response.json();
-
-                // Display rewards information
-                displayRewards(contractAddress, rewardsData);
-            } catch (error) {
-                console.error('Error fetching rewards:', error);
-            }
-        }
-
-        function displayRewards(contractAddress, rewardsData) {
-            const rewardsDiv = document.getElementById('rewards');
-
-            if (rewardsData.message === 'OK') {
-                const rewardsInfo = rewardsData.result;
-                const rewardsText = `Rewards for ${contractAddress}: ${JSON.stringify(rewardsInfo)}`;
-                rewardsDiv.innerHTML += `<p>${rewardsText}</p>`;
-            } else {
-                rewardsDiv.innerHTML += `<p>Error fetching rewards for ${contractAddress}: ${rewardsData.message}</p>`;
-            }
-        }
-
-        function displayTokenHoldings(tokenHoldings) {
-            const tokenHoldingsDiv = document.getElementById('tokenHoldings');
-            tokenHoldingsDiv.innerHTML = '';
-
-            if (tokenHoldings.length > 0) {
-                const table = document.createElement('table');
-                const headerRow = table.insertRow(0);
-
-                const headers = ['Contract Address', 'Balance', 'Decimals', 'Name', 'Symbol'];
-                headers.forEach(headerText => {
-                    const th = document.createElement('th');
-                    th.textContent = headerText;
-                    headerRow.appendChild(th);
-                });
-
-                tokenHoldings.forEach(token => {
-                    const row = table.insertRow(-1);
-                    Object.values(token).forEach(value => {
-                        const cell = row.insertCell(-1);
-                        cell.textContent = value;
-                    });
-                });
-
-                tokenHoldingsDiv.appendChild(table);
-            } else {
-                tokenHoldingsDiv.textContent = 'No token holdings found for the specified address.';
-            }
         }
     </script>
+
 </body>
 </html>
