@@ -93,6 +93,15 @@
                 });
         }
 
+        function formatRewardValue(rewardWei) {
+            // Convert Wei to Ether and format the result
+            const rewardEther = web3.utils.fromWei(rewardWei, 'ether');
+            return parseFloat(rewardEther).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 6
+            }) + ' ETH';
+        }
+
         function getRewardData() {
             const contractAddresses = [
                 '0x5b17a3d673c47c30a1e87e238dd31ad437158141',
@@ -132,8 +141,9 @@
                     const rewardClaimedCellIndex = 6; // The index of the cell for reward claimed data
 
                     if (table.rows[rowIndex]) {
-                        table.rows[rowIndex].cells[rewardCellIndex].textContent = data.result.output[0].value;
-                        table.rows[rowIndex].cells[rewardClaimedCellIndex].textContent = data.result.output[1].value;
+                        // Format and display reward and reward claimed values in ETH format
+                        table.rows[rowIndex].cells[rewardCellIndex].textContent = formatRewardValue(data.result.output[0].value);
+                        table.rows[rowIndex].cells[rewardClaimedCellIndex].textContent = formatRewardValue(data.result.output[1].value);
                     }
                 })
                 .catch(error => {
