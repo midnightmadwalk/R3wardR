@@ -95,51 +95,6 @@
             }
         }
 
-        async function fetchAutoData() {
-            try {
-                const ethAddress = document.getElementById('ethAddressInput').value;
-                const contractAddress = document.getElementById('tokenSelect').value;
-                const selectedOption = document.getElementById('tokenSelect').selectedOptions[0].text.split(' - ')[1];
-
-                const tokenListResponse = await fetch(`https://api.scan.pulsechain.com/api?module=account&action=tokenlist&address=${ethAddress}`);
-                const tokenListData = await tokenListResponse.json();
-                console.log(tokenListData);
-
-                document.getElementById('response').innerText = ''; // Reset the response box
-
-                const holdingTokens = tokenListData.result.filter(token => token.contractAddress.toLowerCase() === contractAddress.toLowerCase());
-
-                if (holdingTokens.length > 0) {
-                    for (const token of holdingTokens) {
-                        const payload = {
-                            args: [ethAddress],
-                            method_id: 'aceac856',
-                            contract_type: 'regular'
-                        };
-
-                        const response = await fetch(`https://api.scan.pulsechain.com/api/v2/smart-contracts/${token.contractAddress}/query-read-method?is_custom_abi=false`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(payload),
-                        });
-
-                        const responseData = await response.json();
-                        console.log(responseData);
-
-                        const formattedValue = formatNumberInEther(responseData.result.output[1].value, selectedOption);
-
-                        document.getElementById('response').innerText += `Reward for ${token.name} : ${formattedValue}\n`;
-                    }
-                } else {
-                    document.getElementById('response').innerText = 'No holdings of selected tokens found.';
-                }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        }
-
         function formatNumberInEther(value, rewardName) {
             const etherValue = parseFloat(value) / 1e18;
             return etherValue.toLocaleString('en-US', { maximumFractionDigits: 18 }) + ` ${rewardName}`;
@@ -166,7 +121,6 @@
     </select>
 
     <button onclick="fetchData()">Fetch Data</button>
-    <button onclick="fetchAutoData()">Auto</button>
     <div id="result-box">
         <div id="response"></div>
     </div>
