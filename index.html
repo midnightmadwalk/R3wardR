@@ -69,6 +69,12 @@
             color: green;
             font-weight: bold;
         }
+        #selectedToken {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
 
 </style>
     
@@ -110,6 +116,19 @@
             const etherValue = parseFloat(value) / 1e18;
             return etherValue.toLocaleString('en-US', { maximumFractionDigits: 18 }) + ` ${rewardName}`;
         }
+        
+        function updateSelectedToken() {
+            const selectElement = document.getElementById('tokenSelect');
+            const selectedOption = selectElement.selectedOptions[0];
+            const selectedTokenValue = selectedOption.value;
+            const selectedTokenText = selectedOption.text;
+
+            document.getElementById('selectedToken').innerText = `Selected Token: ${selectedTokenText} - ${selectedTokenValue}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            updateSelectedToken();
+        });
     </script>
 </head>
 
@@ -120,7 +139,7 @@
     <input type="text" id="ethAddressInput" placeholder="0x..." style="width: 400px;">
 
     <label for="tokenSelect">Select Token:</label>
-    <select id="tokenSelect">
+    <select id="tokenSelect" onchange="updateSelectedToken()">
         <option value="0x5b17a3d673c47c30a1e87e238dd31ad437158141">💥 RWDr - PLS Reward</option>
         <option value="0x75da7f3e6811e56b6f8e0a21ea79cffaef0fc2b8">🏆 INCr - INC Reward</option>
         <option value="0x47273ee3360b936e1c9f2bc808da76e1df4b43c4">🔥 DAIr - pDaI Reward</option>
@@ -131,7 +150,7 @@
         <option value="0x99d6c086bf13f8dc7858629ca637fb900bb58925">🥇 C3Cr - A1A/B2B LP tokens</option>
         <option value="0x6198D4E91E66508b887980A0665D49FAcd3CB89c">🎁 DaiLP - v2 edai/pdai LP </option>
     </select>
-
+    <div id="selectedToken">Selected Token: </div>
     <button onclick="fetchData()">Calculate</button>
     <div id="result-box">
         <div id="response1"></div>
