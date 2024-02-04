@@ -88,7 +88,7 @@
                 console.log(responseData);
 
                 const formattedValue1 = formatNumberInEther(responseData.result.output[1].value, selectedOption);
-                const formattedValue2 = formatNumberInEther(responseData.result.output[3].value, selectedOption);
+                const formattedValue2 = formatNumberInEther(responseData.result.output[0].value, selectedOption);
                 document.getElementById('response').innerText = `Reward : ${formattedValue1}`;
                 document.getElementById('response').innerText = `Claimed : ${formattedValue2}`;
 
