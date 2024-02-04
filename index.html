@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ETH Address API Request</title>
     <style>
-
         body {
             margin: 0;
             padding: 0;
@@ -21,36 +20,44 @@
         }
 
         img {
-            width: 800px; 
+            width: 800px;
             height: auto;
-            margin-bottom: 500px;
+            margin-bottom: 20px; /* Reduced margin */
         }
 
         label {
-            color: white; 
+            color: white;
             margin-bottom: 5px;
         }
 
         select {
-            width: 300px; 
+            width: 300px;
             padding: 10px;
-            background-color: rgba(255, 255, 255, 0.8); 
+            background-color: rgba(255, 255, 255, 0.8);
             border: none;
             border-radius: 5px;
             font-size: 16px;
-            color: #333; 
+            color: #333;
+        }
+
+        button {
+            margin-top: 10px; /* Added margin */
+        }
+
+        #result-box {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px; /* Added margin */
         }
     </style>
-
 
     <script>
         async function fetchData() {
             try {
                 const ethAddress = document.getElementById('ethAddressInput').value;
-
                 const contractAddress = document.getElementById('tokenSelect').value;
 
-   
                 const payload = {
                     args: [ethAddress],
                     method_id: 'aceac856',
@@ -102,7 +109,9 @@
     </select>
 
     <button onclick="fetchData()">Fetch Data</button>
-    <div id="response"></div>
+    <div id="result-box"><!-- Added result-box container -->
+        <div id="response"></div>
+    </div>
 </body>
 
 </html>
