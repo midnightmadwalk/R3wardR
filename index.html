@@ -9,54 +9,49 @@
 
     <h1>Token List Fetcher</h1>
 
-    <label for="ethAddress">Enter Ethereum Address:</label>
-    <input type="text" id="ethAddress" placeholder="Enter Ethereum Address">
+    <label for="tokenSelect">Select Token:</label>
+    <select id="tokenSelect">
+        <option value="0x5b17a3d673c47c30a1e87e238dd31ad437158141">RWDr - pays PLS</option>
+        <option value="0x75da7f3e6811e56b6f8e0a21ea79cffaef0fc2b8">INCr - pays INC</option>
+        <option value="0x47273ee3360b936e1c9f2bc808da76e1df4b43c4">DAIr - pays pDaI</option>
+        <option value="0x282cecf3fef68cf38ee3e3880f69572c376b9cc1">USDCr - pays pUSDC</option>
+        <option value="0x737fd5b88524d0b90b984ba4f64a6b81b1a1dbc0">USDPr - pays pUSDP</option>
+        <option value="0xfa9ff85e0df45752df23d65d3b91e2b788c197bf">MINEr - pays pWBTC</option>
+        <option value="0x61496615a3cc5f3bed6dad8cf3945cb6d7765f02">DIGr - pays pPAXG</option>
+        <option value="0x99d6c086bf13f8dc7858629ca637fb900bb58925">C3Cr - pays A1A/B2B LP tokens</option>
+    </select>
 
-    <button onclick="fetchTokenList()">Fetch Token List</button>
+    <button onclick="fetchSelectedTokenData()">Fetch Token Data</button>
 
-    <div id="tokenListResult"></div>
+    <div id="selectedTokenData"></div>
 
     <script>
-        function fetchTokenList() {
-            const ethAddress = document.getElementById('ethAddress').value;
-            const apiUrl = `https://api.scan.pulsechain.com/api?module=account&action=tokenlist&address=${ethAddress}`;
+        function fetchSelectedTokenData() {
+            const selectedAddress = document.getElementById('tokenSelect').value;
+            const apiUrl = `https://api.scan.pulsechain.com/api?module=account&action=tokenlist&address=${selectedAddress}`;
 
             fetch(apiUrl)
                 .then(response => response.json())
                 .then(data => {
-                    displayTokenList(data.result);
+                    displayTokenData(data.result[0]);
                 })
                 .catch(error => {
                     console.error('Error fetching data:', error);
-                    document.getElementById('tokenListResult').innerHTML = 'Error fetching data. Please check the Ethereum address and try again.';
+                    document.getElementById('selectedTokenData').innerHTML = 'Error fetching data. Please try again.';
                 });
         }
 
-        function displayTokenList(tokenList) {
-            const table = `
-                <table border="1">
-                    <tr>
-                        <th>Name</th>
-                        <th>Symbol</th>
-                        <th>Balance</th>
-                        <th>Contract Address</th>
-                        <th>Decimals</th>
-                        <th>Type</th>
-                    </tr>
-                    ${tokenList.map(token => `
-                        <tr>
-                            <td>${token.name}</td>
-                            <td>${token.symbol}</td>
-                            <td>${token.balance}</td>
-                            <td>${token.contractAddress}</td>
-                            <td>${token.decimals}</td>
-                            <td>${token.type}</td>
-                        </tr>
-                    `).join('')}
-                </table>
+        function displayTokenData(token) {
+            const tokenData = `
+                <p><strong>Name:</strong> ${token.name}</p>
+                <p><strong>Symbol:</strong> ${token.symbol}</p>
+                <p><strong>Balance:</strong> ${token.balance}</p>
+                <p><strong>Contract Address:</strong> ${token.contractAddress}</p>
+                <p><strong>Decimals:</strong> ${token.decimals}</p>
+                <p><strong>Type:</strong> ${token.type}</p>
             `;
 
-            document.getElementById('tokenListResult').innerHTML = table;
+            document.getElementById('selectedTokenData').innerHTML = tokenData;
         }
     </script>
 
