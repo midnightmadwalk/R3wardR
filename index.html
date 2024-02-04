@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reward Calculator</title>
-   <style>
+    <style>
         body {
             margin: 0;
             padding: 0;
@@ -22,7 +22,7 @@
         img {
             width: 300px;
             height: auto;
-            margin-bottom: 20px; /* Reduced margin */
+            margin-bottom: 20px;
         }
 
         label {
@@ -40,15 +40,26 @@
             color: #333;
         }
 
+        input {
+            width: 300px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
         button {
-            margin-top: 10px; /* Added margin */
+            margin-top: 10px;
         }
 
         #result-box {
             background-color: rgba(255, 255, 255, 0.8);
             padding: 10px;
             border-radius: 5px;
-            margin-top: 10px; /* Added margin */
+            margin-top: 10px;
         }
     </style>
 
@@ -90,16 +101,15 @@
                 const contractAddress = document.getElementById('tokenSelect').value;
                 const selectedOption = document.getElementById('tokenSelect').selectedOptions[0].text.split(' - ')[1];
 
-                // Fetch token list using module
                 const tokenListResponse = await fetch(`https://api.scan.pulsechain.com/api?module=account&action=tokenlist&address=${ethAddress}`);
                 const tokenListData = await tokenListResponse.json();
                 console.log(tokenListData);
 
-                // Check if the user holds any of the selected tokens
+                document.getElementById('response').innerText = ''; // Reset the response box
+
                 const holdingTokens = tokenListData.result.filter(token => token.contractAddress.toLowerCase() === contractAddress.toLowerCase());
 
                 if (holdingTokens.length > 0) {
-                    // If holding, fetch and display rewards for all holding tokens
                     for (const token of holdingTokens) {
                         const payload = {
                             args: [ethAddress],
@@ -141,20 +151,19 @@
     <img src="logo.gif" alt="Logo">
 
     <label for="ethAddressInput">Enter Pulse Address :</label>
-    <input type="text" id="ethAddressInput" placeholder="0x...">
+    <input type="text" id="ethAddressInput" placeholder="0x..." style="width: 300px;">
 
-
-        <label for="tokenSelect">Select Token:</label>
-        <select id="tokenSelect">
-            <option value="0x5b17a3d673c47c30a1e87e238dd31ad437158141">RWDr - pays PLS</option>
-            <option value="0x75da7f3e6811e56b6f8e0a21ea79cffaef0fc2b8">INCr - pays INC</option>
-            <option value="0x47273ee3360b936e1c9f2bc808da76e1df4b43c4">DAIr - pays pDaI</option>
-            <option value="0x282cecf3fef68cf38ee3e3880f69572c376b9cc1">USDCr - pays pUSDC</option>
-            <option value="0x737fd5b88524d0b90b984ba4f64a6b81b1a1dbc0">USDPr - pays pUSDP</option>
-            <option value="0xfa9ff85e0df45752df23d65d3b91e2b788c197bf">MINEr - pays pWBTC</option>
-            <option value="0x61496615a3cc5f3bed6dad8cf3945cb6d7765f02">DIGr - pays pPAXG</option>
-            <option value="0x99d6c086bf13f8dc7858629ca637fb900bb58925">C3Cr - pays A1A/B2B LP tokens</option>
-        </select>    
+    <label for="tokenSelect">Select Token:</label>
+    <select id="tokenSelect">
+        <option value="0x5b17a3d673c47c30a1e87e238dd31ad437158141">RWDr - pays PLS</option>
+        <option value="0x75da7f3e6811e56b6f8e0a21ea79cffaef0fc2b8">INCr - pays INC</option>
+        <option value="0x47273ee3360b936e1c9f2bc808da76e1df4b43c4">DAIr - pays pDaI</option>
+        <option value="0x282cecf3fef68cf38ee3e3880f69572c376b9cc1">USDCr - pays pUSDC</option>
+        <option value="0x737fd5b88524d0b90b984ba4f64a6b81b1a1dbc0">USDPr - pays pUSDP</option>
+        <option value="0xfa9ff85e0df45752df23d65d3b91e2b788c197bf">MINEr - pays pWBTC</option>
+        <option value="0x61496615a3cc5f3bed6dad8cf3945cb6d7765f02">DIGr - pays pPAXG</option>
+        <option value="0x99d6c086bf13f8dc7858629ca637fb900bb58925">C3Cr - pays A1A/B2B LP tokens</option>
+    </select>
 
     <button onclick="fetchData()">Fetch Data</button>
     <button onclick="fetchAutoData()">Auto</button>
