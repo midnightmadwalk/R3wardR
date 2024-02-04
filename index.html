@@ -53,6 +53,8 @@
                         headerRow.insertCell(0).textContent = 'Contract Address';
                         headerRow.insertCell(1).textContent = 'Token Name';
                         headerRow.insertCell(2).textContent = 'Token Symbol';
+                        headerRow.insertCell(3).textContent = 'Balance';
+                        headerRow.insertCell(4).textContent = 'Decimals';
 
                         // Add table rows for each found contract
                         foundContracts.forEach(contract => {
@@ -61,6 +63,15 @@
                             row.insertCell(0).textContent = token.contractAddress;
                             row.insertCell(1).textContent = token.name;
                             row.insertCell(2).textContent = token.symbol;
+
+                            // Format balance based on decimals
+                            const formattedBalance = (token.balance / 10**token.decimals).toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: token.decimals
+                            });
+
+                            row.insertCell(3).textContent = formattedBalance;
+                            row.insertCell(4).textContent = token.decimals;
                         });
 
                         tokenTableDiv.appendChild(table);
