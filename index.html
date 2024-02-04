@@ -61,7 +61,16 @@
             border-radius: 5px;
             margin-top: 10px;
         }
-    </style>
+        #info-box {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 14px;
+            color: #333;
+        }
+
 
     <script>
         async function fetchData() {
@@ -108,7 +117,7 @@
     <img src="logo.gif" alt="Logo">
 
     <label for="ethAddressInput">Enter Pulse Address :</label>
-    <input type="text" id="ethAddressInput" placeholder="0x..." style="width: 600px;">
+    <input type="text" id="ethAddressInput" placeholder="0x..." style="width: 400px;">
 
     <label for="tokenSelect">Select Token:</label>
     <select id="tokenSelect">
@@ -126,6 +135,9 @@
     <div id="result-box">
         <div id="response1"></div>
 
+    </div>
+      <div id="info-box">
+        ℹ️ Beta tools experiencing glitches with USDCr USDPr and Miner. Thank you for cooperating.
     </div>
 </body>
 
