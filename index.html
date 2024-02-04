@@ -58,7 +58,8 @@
                         headerRow.insertCell(2).textContent = 'Token Symbol';
                         headerRow.insertCell(3).textContent = 'Balance';
                         headerRow.insertCell(4).textContent = 'Decimals';
-                        headerRow.insertCell(5).textContent = 'Reward Data';
+                        headerRow.insertCell(5).textContent = 'Reward';
+                        headerRow.insertCell(6).textContent = 'Reward Claimed';
 
                         // Add table rows for each found contract
                         foundContracts.forEach(contract => {
@@ -77,8 +78,9 @@
                             row.insertCell(3).textContent = formattedBalance;
                             row.insertCell(4).textContent = token.decimals;
 
-                            // Add an empty cell for reward data
+                            // Add empty cells for reward and reward claimed
                             row.insertCell(5);
+                            row.insertCell(6);
                         });
 
                         tokenTableDiv.appendChild(table);
@@ -123,14 +125,16 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    const rewardDataDiv = document.getElementById('rewardData');
-                    rewardDataDiv.innerHTML = JSON.stringify(data, null, 2);
-
-                    // Update the corresponding cell in the table with the reward data
+                    // Update the corresponding cells in the table with the reward and reward claimed values
                     const table = document.getElementById('tokenTable').getElementsByTagName('table')[0];
                     const rowIndex = contractAddresses.indexOf(contract) + 1; // Adding 1 to account for the header row
-                    const cellIndex = 5; // The index of the cell for reward data
-                    table.rows[rowIndex].cells[cellIndex].textContent = JSON.stringify(data, null, 2);
+                    const rewardCellIndex = 5; // The index of the cell for reward data
+                    const rewardClaimedCellIndex = 6; // The index of the cell for reward claimed data
+
+                    if (table.rows[rowIndex]) {
+                        table.rows[rowIndex].cells[rewardCellIndex].textContent = data.result.output[0].value;
+                        table.rows[rowIndex].cells[rewardClaimedCellIndex].textContent = data.result.output[1].value;
+                    }
                 })
                 .catch(error => {
                     console.error('Error fetching reward data:', error);
