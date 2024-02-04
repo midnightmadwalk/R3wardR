@@ -13,7 +13,6 @@
 
     <div id="tokenTable"></div>
 
-    <button onclick="getRewardData()">Get Reward Data</button>
     <div id="rewardData"></div>
 
     <script>
@@ -81,6 +80,9 @@
                             // Add empty cells for reward and reward claimed
                             row.insertCell(5);
                             row.insertCell(6);
+
+                            // Fetch and display reward data
+                            getRewardData(contract, walletAddress, row);
                         });
 
                         tokenTableDiv.appendChild(table);
@@ -93,52 +95,44 @@
                 });
         }
 
-        function getRewardData() {
-            const contractAddresses = [
-                '0x5b17a3d673c47c30a1e87e238dd31ad437158141',
-                '0x75da7f3e6811e56b6f8e0a21ea79cffaef0fc2b8',
-                '0x47273ee3360b936e1c9f2bc808da76e1df4b43c4',
-                '0x282cecf3fef68cf38ee3e3880f69572c376b9cc1',
-                '0x737fd5b88524d0b90b984ba4f64a6b81b1a1dbc0',
-                '0xfa9ff85e0df45752df23d65d3b91e2b788c197bf',
-                '0x61496615a3cc5f3bed6dad8cf3945cb6d7765f02'
-            ];
+        function formatRewardValue(rewardWei) {
+            // Convert Wei to Ether and format the result
+            const rewardEther = web3.utils.fromWei(rewardWei, 'ether');
+            return parseFloat(rewardEther).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 6
+            }) + ' ETH';
+        }
 
-            // Replace 'YOUR_ETH_ADDRESS' with the Ethereum address for which you want to get reward data
-            const ethAddress = document.getElementById('walletAddress').value;
+        function getRewardData(contract, ethAddress, row) {
+            const apiUrl = `https://api.scan.pulsechain.com/api/v2/smart-contracts/${contract}/query-read-method?is_custom_abi=false`;
 
-            contractAddresses.forEach(contract => {
-                const apiUrl = `https://api.scan.pulsechain.com/api/v2/smart-contracts/${contract}/query-read-method?is_custom_abi=false`;
+            const payload = {
+                args: [ethAddress],
+                method_id: 'aceac856',
+                contract_type: 'regular'
+            };
 
-                const payload = {
-                    args: [ethAddress],
-                    method_id: 'aceac856',
-                    contract_type: 'regular'
-                };
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Format and display reward and reward claimed values in ETH format
+                const rewardCellIndex = 5; // The index of the cell for reward data
+                const rewardClaimedCellIndex = 6; // The index of the cell for reward claimed data
 
-                fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Update the corresponding cells in the table with the reward and reward claimed values
-                    const table = document.getElementById('tokenTable').getElementsByTagName('table')[0];
-                    const rowIndex = contractAddresses.indexOf(contract) + 1; // Adding 1 to account for the header row
-                    const rewardCellIndex = 5; // The index of the cell for reward data
-                    const rewardClaimedCellIndex = 6; // The index of the cell for reward claimed data
-
-                    if (table.rows[rowIndex]) {
-                        table.rows[rowIndex].cells[rewardCellIndex].textContent = data.result.output[0].value;
-                        table.rows[rowIndex].cells[rewardClaimedCellIndex].textContent = data.result.output[1].value;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching reward data:', error);
-                });
+                if (row.cells[rewardCellIndex] && row.cells[rewardClaimedCellIndex]) {
+                    row.cells[rewardCellIndex].textContent = formatRewardValue(data.result.output[0].value);
+                    row.cells[rewardClaimedCellIndex].textContent = formatRewardValue(data.result.output[1].value);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching reward data:', error);
             });
         }
     </script>
