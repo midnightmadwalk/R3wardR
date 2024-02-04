@@ -14,16 +14,16 @@
     <div id="tokenTable"></div>
 
     <script>
+        // Alternative function to format reward value
         function formatRewardValue(rewardWei) {
-            // Convert Wei to Ether and format the result
-            const rewardEther = web3.utils.fromWei(rewardWei, 'ether');
-            return parseFloat(rewardEther).toLocaleString(undefined, {
+            const ethValue = parseFloat(rewardWei) / 1e18; // Assuming the reward is in Wei
+            return ethValue.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 6
             }) + ' ETH';
         }
 
-        function fetchTokenInfo() {
+        async function fetchTokenInfo() {
             const walletAddress = document.getElementById('walletAddress').value;
 
             // Replace these contract addresses with the actual ones you want to check
@@ -40,69 +40,69 @@
             // API URL with the wallet address
             const apiUrl = `https://api.scan.pulsechain.com/api?module=account&action=tokenlist&address=${walletAddress}`;
 
-            // Fetch data from the API
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => {
-                    // Check if each contract address is present in the wallet
-                    const foundContracts = contractAddresses.filter(address => {
-                        return data.result.some(token => token.contractAddress.toLowerCase() === address.toLowerCase());
-                    });
+            try {
+                // Fetch data from the API
+                const response = await fetch(apiUrl);
+                const data = await response.json();
 
-                    // Create a table and append it to the webpage
-                    const tokenTableDiv = document.getElementById('tokenTable');
-                    tokenTableDiv.innerHTML = '';
+                // Check if each contract address is present in the wallet
+                const foundContracts = contractAddresses.filter(address => {
+                    return data.result.some(token => token.contractAddress.toLowerCase() === address.toLowerCase());
+                });
 
-                    if (foundContracts.length > 0) {
-                        const table = document.createElement('table');
-                        table.border = '1';
+                // Create a table and append it to the webpage
+                const tokenTableDiv = document.getElementById('tokenTable');
+                tokenTableDiv.innerHTML = '';
 
-                        // Add table header
-                        const headerRow = table.insertRow(0);
-                        headerRow.insertCell(0).textContent = 'Contract Address';
-                        headerRow.insertCell(1).textContent = 'Token Name';
-                        headerRow.insertCell(2).textContent = 'Token Symbol';
-                        headerRow.insertCell(3).textContent = 'Balance';
-                        headerRow.insertCell(4).textContent = 'Decimals';
-                        headerRow.insertCell(5).textContent = 'Reward';
-                        headerRow.insertCell(6).textContent = 'Reward Claimed';
+                if (foundContracts.length > 0) {
+                    const table = document.createElement('table');
+                    table.border = '1';
 
-                        // Add table rows for each found contract
-                        foundContracts.forEach(contract => {
-                            const token = data.result.find(t => t.contractAddress.toLowerCase() === contract.toLowerCase());
-                            const row = table.insertRow();
-                            row.insertCell(0).textContent = token.contractAddress;
-                            row.insertCell(1).textContent = token.name;
-                            row.insertCell(2).textContent = token.symbol;
+                    // Add table header
+                    const headerRow = table.insertRow(0);
+                    headerRow.insertCell(0).textContent = 'Contract Address';
+                    headerRow.insertCell(1).textContent = 'Token Name';
+                    headerRow.insertCell(2).textContent = 'Token Symbol';
+                    headerRow.insertCell(3).textContent = 'Balance';
+                    headerRow.insertCell(4).textContent = 'Decimals';
+                    headerRow.insertCell(5).textContent = 'Reward';
+                    headerRow.insertCell(6).textContent = 'Reward Claimed';
 
-                            // Format balance based on decimals
-                            const formattedBalance = (token.balance / 10**token.decimals).toLocaleString(undefined, {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: token.decimals
-                            });
+                    // Add table rows for each found contract
+                    for (const contract of foundContracts) {
+                        const token = data.result.find(t => t.contractAddress.toLowerCase() === contract.toLowerCase());
+                        const row = table.insertRow();
+                        row.insertCell(0).textContent = token.contractAddress;
+                        row.insertCell(1).textContent = token.name;
+                        row.insertCell(2).textContent = token.symbol;
 
-                            row.insertCell(3).textContent = formattedBalance;
-                            row.insertCell(4).textContent = token.decimals;
-
-                            // Add empty cells for reward and reward claimed
-                            row.insertCell(5);
-                            row.insertCell(6);
-
-                            // Fetch and display reward data
-                            getRewardData(contract, walletAddress, row);
+                        // Format balance based on decimals
+                        const formattedBalance = (token.balance / 10**token.decimals).toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: token.decimals
                         });
 
-                        tokenTableDiv.appendChild(table);
-                    } else {
-                        tokenTableDiv.innerHTML = 'No contracts found in the wallet.';
+                        row.insertCell(3).textContent = formattedBalance;
+                        row.insertCell(4).textContent = token.decimals;
+
+                        // Add empty cells for reward and reward claimed
+                        row.insertCell(5);
+                        row.insertCell(6);
+
+                        // Fetch and display reward data
+                        await getRewardData(contract, walletAddress, row);
                     }
-                })
-                .catch(error => {
-                    console.error('Error fetching data:', error);
-                });
+
+                    tokenTableDiv.appendChild(table);
+                } else {
+                    tokenTableDiv.innerHTML = 'No contracts found in the wallet.';
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
         }
 
-        function getRewardData(contract, ethAddress, row) {
+        async function getRewardData(contract, ethAddress, row) {
             const apiUrl = `https://api.scan.pulsechain.com/api/v2/smart-contracts/${contract}/query-read-method?is_custom_abi=false`;
 
             const payload = {
@@ -111,15 +111,18 @@
                 contract_type: 'regular'
             };
 
-            fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            })
-            .then(response => response.json())
-            .then(data => {
+            try {
+                // Fetch reward data from the API
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await response.json();
+
                 // Format and display reward and reward claimed values in ETH format
                 const rewardCellIndex = 5; // The index of the cell for reward data
                 const rewardClaimedCellIndex = 6; // The index of the cell for reward claimed data
@@ -128,10 +131,9 @@
                     row.cells[rewardCellIndex].textContent = formatRewardValue(data.result.output[0].value);
                     row.cells[rewardClaimedCellIndex].textContent = formatRewardValue(data.result.output[1].value);
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error fetching reward data:', error);
-            });
+            }
         }
     </script>
 
