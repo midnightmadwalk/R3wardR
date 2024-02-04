@@ -1,119 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Token Information</title>
-</head>
-<body>
+    <title>Reward Calculator</title>
+   <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url("logo.jpg");
+            background-size: cover;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
 
-    <label for="walletAddress">Enter Ethereum Address: </label>
-    <input type="text" id="walletAddress" placeholder="Enter Ethereum address">
-    <button onclick="fetchTokenInfo()">Fetch Token Info</button>
+        img {
+            width: 300px;
+            height: auto;
+            margin-bottom: 20px; /* Reduced margin */
+        }
 
-    <div id="tokenTable"></div>
+        label {
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        select {
+            width: 300px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        button {
+            margin-top: 10px; /* Added margin */
+        }
+
+        #result-box {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px; /* Added margin */
+        }
+    </style>
 
     <script>
-        // Alternative function to format reward value
-        function formatRewardValue(rewardWei) {
-            const ethValue = parseFloat(rewardWei) / 1e18; // Assuming the reward is in Wei
-            return ethValue.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 6
-            }) + ' ETH';
-        }
-
-        async function fetchTokenInfo() {
-            const walletAddress = document.getElementById('walletAddress').value;
-
-            // Replace these contract addresses with the actual ones you want to check
-            const contractAddresses = [
-                '0x5b17a3d673c47c30a1e87e238dd31ad437158141',
-                '0x75da7f3e6811e56b6f8e0a21ea79cffaef0fc2b8',
-                '0x47273ee3360b936e1c9f2bc808da76e1df4b43c4',
-                '0x282cecf3fef68cf38ee3e3880f69572c376b9cc1',
-                '0x737fd5b88524d0b90b984ba4f64a6b81b1a1dbc0',
-                '0xfa9ff85e0df45752df23d65d3b91e2b788c197bf',
-                '0x61496615a3cc5f3bed6dad8cf3945cb6d7765f02'
-            ];
-
-            // API URL with the wallet address
-            const apiUrl = `https://api.scan.pulsechain.com/api?module=account&action=tokenlist&address=${walletAddress}`;
-
+        async function fetchData() {
             try {
-                // Fetch data from the API
-                const response = await fetch(apiUrl);
-                const data = await response.json();
+                const ethAddress = document.getElementById('ethAddressInput').value;
+                const contractAddress = document.getElementById('tokenSelect').value;
+                const selectedOption = document.getElementById('tokenSelect').selectedOptions[0].text.split(' - ')[1];
 
-                // Check if each contract address is present in the wallet
-                const foundContracts = contractAddresses.filter(address => {
-                    return data.result.some(token => token.contractAddress.toLowerCase() === address.toLowerCase());
-                });
+                const payload = {
+                    args: [ethAddress],
+                    method_id: 'aceac856',
+                    contract_type: 'regular'
+                };
 
-                // Create a table and append it to the webpage
-                const tokenTableDiv = document.getElementById('tokenTable');
-                tokenTableDiv.innerHTML = '';
-
-                if (foundContracts.length > 0) {
-                    const table = document.createElement('table');
-                    table.border = '1';
-
-                    // Add table header
-                    const headerRow = table.insertRow(0);
-                    headerRow.insertCell(0).textContent = 'Contract Address';
-                    headerRow.insertCell(1).textContent = 'Token Name';
-                    headerRow.insertCell(2).textContent = 'Token Symbol';
-                    headerRow.insertCell(3).textContent = 'Balance';
-                    headerRow.insertCell(4).textContent = 'Decimals';
-                    headerRow.insertCell(5).textContent = 'Reward';
-                    headerRow.insertCell(6).textContent = 'Reward Claimed';
-
-                    // Add table rows for each found contract
-                    for (const contract of foundContracts) {
-                        const token = data.result.find(t => t.contractAddress.toLowerCase() === contract.toLowerCase());
-                        const row = table.insertRow();
-                        row.insertCell(0).textContent = token.contractAddress;
-                        row.insertCell(1).textContent = token.name;
-                        row.insertCell(2).textContent = token.symbol;
-
-                        // Format balance based on decimals
-                        const formattedBalance = (token.balance / 10**token.decimals).toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: token.decimals
-                        });
-
-                        row.insertCell(3).textContent = formattedBalance;
-                        row.insertCell(4).textContent = token.decimals;
-
-                        // Add empty cells for reward and reward claimed
-                        row.insertCell(5);
-                        row.insertCell(6);
-
-                        // Fetch and display reward data
-                        await getRewardData(contract, walletAddress, row);
-                    }
-
-                    tokenTableDiv.appendChild(table);
-                } else {
-                    tokenTableDiv.innerHTML = 'No contracts found in the wallet.';
-                }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        }
-
-        async function getRewardData(contract, ethAddress, row) {
-            const apiUrl = `https://api.scan.pulsechain.com/api/v2/smart-contracts/${contract}/query-read-method?is_custom_abi=false`;
-
-            const payload = {
-                args: [ethAddress],
-                method_id: 'aceac856',
-                contract_type: 'regular'
-            };
-
-            try {
-                // Fetch reward data from the API
-                const response = await fetch(apiUrl, {
+                const response = await fetch(`https://api.scan.pulsechain.com/api/v2/smart-contracts/${contractAddress}/query-read-method?is_custom_abi=false`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -121,21 +73,94 @@
                     body: JSON.stringify(payload),
                 });
 
-                const data = await response.json();
+                const responseData = await response.json();
+                console.log(responseData);
 
-                // Format and display reward and reward claimed values in ETH format
-                const rewardCellIndex = 5; // The index of the cell for reward data
-                const rewardClaimedCellIndex = 6; // The index of the cell for reward claimed data
+                const formattedValue = formatNumberInEther(responseData.result.output[1].value, selectedOption);
 
-                if (row.cells[rewardCellIndex] && row.cells[rewardClaimedCellIndex]) {
-                    row.cells[rewardCellIndex].textContent = formatRewardValue(data.result.output[0].value);
-                    row.cells[rewardClaimedCellIndex].textContent = formatRewardValue(data.result.output[1].value);
-                }
+                document.getElementById('response').innerText = `Reward : ${formattedValue}`;
             } catch (error) {
-                console.error('Error fetching reward data:', error);
+                console.error('Error fetching data:', error);
             }
         }
-    </script>
 
+        async function fetchAutoData() {
+            try {
+                const ethAddress = document.getElementById('ethAddressInput').value;
+                const contractAddress = document.getElementById('tokenSelect').value;
+                const selectedOption = document.getElementById('tokenSelect').selectedOptions[0].text.split(' - ')[1];
+
+                // Fetch token list using module
+                const tokenListResponse = await fetch(`https://api.scan.pulsechain.com/api?module=account&action=tokenlist&address=${ethAddress}`);
+                const tokenListData = await tokenListResponse.json();
+                console.log(tokenListData);
+
+                // Check if the user holds any of the selected tokens
+                const holdingTokens = tokenListData.result.filter(token => token.contractAddress.toLowerCase() === contractAddress.toLowerCase());
+
+                if (holdingTokens.length > 0) {
+                    // If holding, fetch and display rewards for all holding tokens
+                    for (const token of holdingTokens) {
+                        const payload = {
+                            args: [ethAddress],
+                            method_id: 'aceac856',
+                            contract_type: 'regular'
+                        };
+
+                        const response = await fetch(`https://api.scan.pulsechain.com/api/v2/smart-contracts/${token.contractAddress}/query-read-method?is_custom_abi=false`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(payload),
+                        });
+
+                        const responseData = await response.json();
+                        console.log(responseData);
+
+                        const formattedValue = formatNumberInEther(responseData.result.output[1].value, selectedOption);
+
+                        document.getElementById('response').innerText += `Reward for ${token.name} : ${formattedValue}\n`;
+                    }
+                } else {
+                    document.getElementById('response').innerText = 'No holdings of selected tokens found.';
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        function formatNumberInEther(value, rewardName) {
+            const etherValue = parseFloat(value) / 1e18;
+            return etherValue.toLocaleString('en-US', { maximumFractionDigits: 18 }) + ` ${rewardName}`;
+        }
+    </script>
+</head>
+
+<body>
+    <img src="logo.gif" alt="Logo">
+
+    <label for="ethAddressInput">Enter Pulse Address :</label>
+    <input type="text" id="ethAddressInput" placeholder="0x...">
+
+
+        <label for="tokenSelect">Select Token:</label>
+        <select id="tokenSelect">
+            <option value="0x5b17a3d673c47c30a1e87e238dd31ad437158141">RWDr - pays PLS</option>
+            <option value="0x75da7f3e6811e56b6f8e0a21ea79cffaef0fc2b8">INCr - pays INC</option>
+            <option value="0x47273ee3360b936e1c9f2bc808da76e1df4b43c4">DAIr - pays pDaI</option>
+            <option value="0x282cecf3fef68cf38ee3e3880f69572c376b9cc1">USDCr - pays pUSDC</option>
+            <option value="0x737fd5b88524d0b90b984ba4f64a6b81b1a1dbc0">USDPr - pays pUSDP</option>
+            <option value="0xfa9ff85e0df45752df23d65d3b91e2b788c197bf">MINEr - pays pWBTC</option>
+            <option value="0x61496615a3cc5f3bed6dad8cf3945cb6d7765f02">DIGr - pays pPAXG</option>
+            <option value="0x99d6c086bf13f8dc7858629ca637fb900bb58925">C3Cr - pays A1A/B2B LP tokens</option>
+        </select>    
+
+    <button onclick="fetchData()">Fetch Data</button>
+    <button onclick="fetchAutoData()">Auto</button>
+    <div id="result-box">
+        <div id="response"></div>
+    </div>
 </body>
+
 </html>
