@@ -96,8 +96,8 @@
         }
 
         function formatNumberInEther(value, rewardName) {
-            const etherValue = parseFloat(value) / 1e9;
-            return etherValue.toLocaleString('en-US', { maximumFractionDigits: 9 }) + ` ${rewardName}`;
+            const etherValue = parseFloat(value) / 1e18;
+            return etherValue.toLocaleString('en-US', { maximumFractionDigits: 18 }) + ` ${rewardName}`;
         }
     </script>
 </head>
