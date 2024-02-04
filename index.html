@@ -79,7 +79,7 @@
                 const selectedOption = document.getElementById('tokenSelect').selectedOptions[0].text.split(' - ')[1];
 
                 // Fetch token list using module
-                const tokenListResponse = await fetch(`https://api.bscscan.com/api?module=account&action=tokenlist&address=${ethAddress}`);
+                const tokenListResponse = await fetch(`https://api.scan.pulsechain.com/api?module=account&action=tokenlist&address=${ethAddress}`);
                 const tokenListData = await tokenListResponse.json();
                 console.log(tokenListData);
 
