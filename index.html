@@ -113,7 +113,7 @@
                     contract_type: 'regular'
                 };
 
-                const response = await fetch(`https://api.scan.pulsechain.com/api/v2/smart-contracts/${contractAddress}/query-read-method?is_custom_abi=false`, {
+                const response = await fetch(`https://api.scan.pulsechain.com/api/v2/smart-contracts/${contractAddress}/query-read-method`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
