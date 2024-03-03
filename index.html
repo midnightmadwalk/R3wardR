@@ -2,15 +2,16 @@
 <html lang="en">
 
 <head>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REWARDr ECOSYSTEM REWARD CALCULATOR</title>
     <style>
-        html, body {
+        html,
+        body {
             overflow: hidden;
         }
+
         body {
             margin: 0;
             padding: 0;
@@ -35,18 +36,9 @@
             margin-bottom: 5px;
         }
 
-        select {
-            width: 300px;
-            padding: 10px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            color: #333;
-        }
-
+        select,
         input {
-            width: 300px;
+            width: 400px;
             padding: 10px;
             background-color: rgba(255, 255, 255, 0.8);
             border: none;
@@ -58,48 +50,55 @@
 
         button {
             margin-top: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
         }
 
-        #result-box {
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
+        button:hover {
+            background-color: #0056b3;
         }
-        #info-box {
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            color: green;
-            font-weight: bold;
-        }
+
+        #result-box,
+        #info-box,
         #selectedToken {
             background-color: rgba(255, 255, 255, 0.8);
             padding: 10px;
             border-radius: 5px;
             margin-top: 10px;
         }
+
+        #info-box {
+            color: green;
+            font-weight: bold;
+        }
+
         .footer {
+            position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
             padding: 20px;
             text-align: center;
             color: white;
-            }
-            .social-icons a {
-            color: white;
-            margin: 10px; /* Increased the margin for spacing */
-            font-size: 70px; /* Increased the font size to make icons bigger */
-            text-decoration: none;
-            }
+            background-color: #333;
+        }
 
-            .social-icons a:hover {
+        .social-icons a {
+            color: white;
+            margin: 10px;
+            font-size: 24px;
+            text-decoration: none;
+        }
+
+        .social-icons a:hover {
             color: #00aaff;
         }
-</style>
-    
+    </style>
+
     <script>
         async function fetchData() {
             try {
@@ -125,10 +124,10 @@
                 console.log(responseData);
 
                 const formattedValue1 = formatNumberInEther(responseData.result.output[1].value, selectedOption);
-              //  const formattedValue2 = formatNumberInEther(responseData.result.output[0].value, selectedOption);
+                //  const formattedValue2 = formatNumberInEther(responseData.result.output[0].value, selectedOption);
                 document.getElementById('response1').innerText = `Reward : ${formattedValue1}`;
-               // document.getElementById('response2').innerText = `RewardClaimed : ${formattedValue2}`;
-              // <div id="response2"></div>
+                // document.getElementById('response2').innerText = `RewardClaimed : ${formattedValue2}`;
+                // <div id="response2"></div>
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -136,9 +135,11 @@
 
         function formatNumberInEther(value, rewardName) {
             const etherValue = parseFloat(value) / 1e18;
-            return etherValue.toLocaleString('en-US', { maximumFractionDigits: 18 }) + ` ${rewardName}`;
+            return etherValue.toLocaleString('en-US', {
+                maximumFractionDigits: 18
+            }) + ` ${rewardName}`;
         }
-        
+
         function updateSelectedToken() {
             const selectElement = document.getElementById('tokenSelect');
             const selectedOption = selectElement.selectedOptions[0];
@@ -158,7 +159,7 @@
     <img src="logo.gif" alt="Logo">
 
     <label for="ethAddressInput">Enter Pulse Address :</label>
-    <input type="text" id="ethAddressInput" placeholder="0x..." style="width: 400px;">
+    <input type="text" id="ethAddressInput" placeholder="0x...">
 
     <label for="tokenSelect">Select Token:</label>
     <select id="tokenSelect" onchange="updateSelectedToken()">
@@ -172,26 +173,26 @@
         <option value="0x99d6c086bf13f8dc7858629ca637fb900bb58925">🥇 C3Cr - A1A/B2B LP tokens</option>
         <option value="0x6198D4E91E66508b887980A0665D49FAcd3CB89c">🎁 DaiLP - v2 edai/pdai LP </option>
         <option value="0x1Ce10867a7D779CC4E1B82A5a6A9D2E3768ad0C3">🎯 CENTr - edai/pdai LP AND ewbtc/pwbtc LP in one LP </option>
-        <option vlaue="0x2CDA6C4d9c0F27d2565D688D292d3b0568DD613b">🧸 BEAr - TEDDY BEAR ㉾ Reward</option>
+        <option value="0x2CDA6C4d9c0F27d2565D688D292d3b0568DD613b">🧸 BEAr - TEDDY BEAR ㉾ Reward</option>
         <option value="0x6f8cbfa5072462282f331967730EDCe532a73b69">🌿 ATROPAr ATROPA Reward</option>
     </select>
     <div id="selectedToken">Selected Token: </div>
     <button onclick="fetchData()">Calculate</button>
     <div id="result-box">
         <div id="response1"></div>
-
     </div>
-      <div id="info-box">
-              STEP : 1 Enter your wallet address containing REWARDr ECOSYSTEM tokens.
-         <br> STEP : 2 Select token from list.
-         <br> STEP : 3 Hit "calculate" button.
-         <br>🚴‍♂️ Beta tool experiencing glitches with USDCr USDPr and MINEr. Thank you for co-operating.
+    <div id="info-box">
+        STEP : 1 Enter your wallet address containing REWARDr ECOSYSTEM tokens.
+        <br> STEP : 2 Select token from list.
+        <br> STEP : 3 Hit "calculate" button.
+        <br>🚴‍♂️ Beta tool experiencing glitches with USDCr USDPr and MINEr. Thank you for co-operating.
     </div>
-        <div class="footer">
+    <div class="footer">
         <div class="social-icons">
-          <a href="https://telegram.dog/REWARDrPulseChain" target="_blank"><i class="fab fa-telegram"></i></a>
-          <a href="https://twitter.com/REWARDrEco" target="_blank"><i class="fab fa-twitter"></i></a>
-          </div></div>
+            <a href="https://telegram.dog/REWARDrPulseChain" target="_blank"><i class="fab fa-telegram"></i></a>
+            <a href="https://twitter.com/REWARDrEco" target="_blank"><i class="fab fa-twitter"></i></a>
+        </div>
+    </div>
 </body>
 
 </html>
