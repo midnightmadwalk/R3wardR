@@ -1,4 +1,3 @@
-
 const numberOfPumpkins = 30;
 
 function createFallingPumpkin() {
@@ -25,6 +24,7 @@ function createFallingPumpkin() {
       pumpkin.remove(); 
     }
   }, 30); 
+}
 
 for (let i = 0; i < numberOfPumpkins; i++) {
   setTimeout(createFallingPumpkin, i * 500); // Add delay between pumpkin creations
