@@ -8,7 +8,7 @@ function createFallingPumpkin() {
   pumpkin.style.top = '-50px'; 
   pumpkin.style.left = Math.random() * window.innerWidth + 'px'; 
   pumpkin.style.fontSize = Math.random() * 30 + 20 + 'px'; 
-  pumpkin.style.zIndex = '9999'; /
+  pumpkin.style.zIndex = '9999'; 
   document.body.appendChild(pumpkin);
 
   let fallSpeed = Math.random() * 5 + 2; 
