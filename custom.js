@@ -28,6 +28,6 @@ window.onload = function() {
   }
 
   for (let i = 0; i < numberOfPumpkins; i++) {
-    setTimeout(createFallingPumpkin, i * 500); // Add delay between pumpkin creations
+    setTimeout(createFallingPumpkin, i * 50); // Add delay between pumpkin creations
   }
 };
