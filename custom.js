@@ -1,6 +1,4 @@
 window.onload = function() {
-  const numberOfPumpkins = 30;
-
   function createFallingPumpkin() {
     const pumpkin = document.createElement('div'); 
     pumpkin.innerText = '🎃'; 
@@ -20,6 +18,7 @@ window.onload = function() {
       pumpkin.style.top = currentTop + fallSpeed + 'px';
       pumpkin.style.left = currentLeft + horizontalMovement + 'px';
 
+      // Remove pumpkin if it goes below the screen
       if (currentTop > window.innerHeight) {
         clearInterval(fallInterval);
         pumpkin.remove(); 
@@ -27,7 +26,6 @@ window.onload = function() {
     }, 30); 
   }
 
-  for (let i = 0; i < numberOfPumpkins; i++) {
-    setTimeout(createFallingPumpkin, i * 50); // Add delay between pumpkin creations
-  }
+  // Use setInterval to create a pumpkin every 500ms (or your desired interval)
+  setInterval(createFallingPumpkin, 500); // 500ms between new pumpkins
 };
