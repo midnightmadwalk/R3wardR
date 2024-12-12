@@ -1,7 +1,7 @@
 window.onload = function() {
   function createFallingPumpkin() {
     const pumpkin = document.createElement('div'); 
-    pumpkin.innerText = '🎃'; 
+    pumpkin.innerText = '🌲' 
     pumpkin.style.position = 'fixed'; 
     pumpkin.style.top = '-50px'; 
     pumpkin.style.left = Math.random() * window.innerWidth + 'px'; 
